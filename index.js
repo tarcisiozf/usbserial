@@ -78,6 +78,9 @@ class UsbSerial extends EventEmitter {
     assert(device.interfaces.length === 1);
 
     let iface = device.interfaces[0];
+    if (iface.isKernelDriverActive()) {
+      iface.detachKernelDriver()
+    }
     iface.claim();
 
     let int_ep = find_ep(iface, usb.LIBUSB_TRANSFER_TYPE_INTERRUPT, 'in');

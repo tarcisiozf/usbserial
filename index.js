@@ -39,7 +39,7 @@ function vendor_read(device, value, index) {
 }
 
 function vendor_write(device, value, index) {
-  return controlTransfer(device, 0x40, 0x01, value, index, new Buffer(0));
+  return controlTransfer(device, 0x40, 0x01, value, index, Buffer.alloc(0));
 }
 
 function setBaudrate(device, baud) {

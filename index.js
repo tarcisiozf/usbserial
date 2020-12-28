@@ -66,36 +66,46 @@ class UsbSerial extends EventEmitter {
     port = port || 0;
     let devices = findDevices(0x067b, 0x2303);
     assert(devices.length > port);
+
     let device = devices[port];
     let descriptor = device.deviceDescriptor;
     this.device = device;
+
     assert(descriptor.bDeviceClass !== 0x02);
     assert(descriptor.bMaxPacketSize0 === 0x40); // HX type
     device.timeout = 100;
     device.open();
     assert(device.interfaces.length === 1);
+
     let iface = device.interfaces[0];
     iface.claim();
+
     let int_ep = find_ep(iface, usb.LIBUSB_TRANSFER_TYPE_INTERRUPT, 'in');
     int_ep.on('data', data => {
       this.emit('status', data);
     });
+
     int_ep.on('error', err => {
       this.emit('error', err);
     });
+
     int_ep.startPoll();
+
     let in_ep = find_ep(iface, usb.LIBUSB_TRANSFER_TYPE_BULK, 'in');
     in_ep.on('data', data => {
       this.emit('data', data);
     });
+
     in_ep.on('error', err => {
       this.emit('error', err);
     });
+
     let out_ep = find_ep(iface, usb.LIBUSB_TRANSFER_TYPE_BULK, 'out');
     out_ep.on('error', err => {
       this.emit('error', err);
     });
     this.out_ep = out_ep;
+
     vendor_read(device, 0x8484, 0)
       .then(() => vendor_write(device, 0x0404, 0))
       .then(() => vendor_read(device, 0x8484, 0))
